@@ -1,3 +1,4 @@
 %{
-  "jason": {:hex, :jason, "1.1.2", "b03dedea67a99223a2eaf9f1264ce37154564de899fd3d8b9a21b1a6fd64afe7", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm"},
+  "fe": {:hex, :fe, "0.1.4", "e48369b4aa6248f7abae820ccf55809c22b5655db32ee6fee881b804fb446a1c", [:make, :mix], [], "hexpm", "da192bf828728f652e5f5c1b0e6216e396ebebcc3c982a4f665f8d17b391a271"},
+  "jason": {:hex, :jason, "1.1.2", "b03dedea67a99223a2eaf9f1264ce37154564de899fd3d8b9a21b1a6fd64afe7", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "fdf843bca858203ae1de16da2ee206f53416bbda5dc8c9e78f43243de4bc3afe"},
 }

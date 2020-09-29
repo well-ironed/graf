@@ -19,6 +19,7 @@ defmodule Codegraph.MixProject do
 
   defp deps do
     [
+      {:fe, "~> 0.1.4"},
       {:jason, "~> 1.1"}
     ]
   end

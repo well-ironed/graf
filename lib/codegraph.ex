@@ -54,65 +54,49 @@ defmodule Codegraph do
   defp function_calls({:function, :module_info, 0, _, _}, _, graph), do: graph
   defp function_calls({:function, :module_info, 1, _, _}, _, graph), do: graph
 
-  defp function_calls({:function, _, _, _, bytecode}, module, graph) do
-    opcode_to_edge(bytecode, module, graph)
+  defp function_calls({:function, _, _, _, opcodes}, module, graph) do
+    opcodes
+    |> Enum.flat_map(&opcode_to_edges(module, &1))
+    |> Enum.reduce(graph, fn {from, to}, graph ->
+      Graph.add_edge(graph, from, to)
+    end)
   end
 
-  defp opcode_to_edge([], _, graph) do
-    graph
+  defp opcode_to_edges(module,
+    {:call_ext_only, _, {:extfunc, another_module, _, _}}) do
+    [{module, another_module}]
   end
 
-  defp opcode_to_edge(
-         [{:call_ext_only, _, {:extfunc, another_module, _, _}} | rest],
-         module,
-         graph
-       ) do
-    graph = Graph.add_edge(graph, module, another_module)
-    opcode_to_edge(rest, module, graph)
+  defp opcode_to_edges(module, {:call_ext, _, {:extfunc, another_module, _, _}}) do
+    [{module, another_module}]
   end
 
-  defp opcode_to_edge([{:call_ext, _, {:extfunc, another_module, _, _}} | rest], module, graph) do
-    graph = Graph.add_edge(graph, module, another_module)
-    opcode_to_edge(rest, module, graph)
-  end
+  defp opcode_to_edges(module, {:move, {:literal, literal}, _}) do
+    if is_function(literal) do
+      case :erlang.fun_info(literal, :type) do
+        {:type, :external} ->
+          {:module, another_module} = :erlang.fun_info(literal, :module)
+          [{module, another_module}]
 
-  defp opcode_to_edge([{:move, {:literal, literal}, _} | rest], module, graph) do
-    graph =
-      if is_function(literal) do
-        case :erlang.fun_info(literal, :type) do
-          {:type, :external} ->
-            {:module, another_module} = :erlang.fun_info(literal, :module)
-            Graph.add_edge(graph, module, another_module)
-
-          _ ->
-            graph
-        end
-      else
-        graph
+        _ ->
+          []
       end
-
-    opcode_to_edge(rest, module, graph)
+    else
+        []
+    end
   end
 
-  defp opcode_to_edge(
-         [{:test, :is_eq_exact, _, comparisons} | rest],
-         module,
-         graph
-       ) do
-      graph =
-        comparisons
-        |> Enum.filter(fn
-          {:atom, maybe_another_module} -> is_elixir_module(maybe_another_module)
-          _ -> false
-        end)
-        |> Enum.reduce(graph, fn {:atom, another_module}, graph ->
-          Graph.add_edge(graph, module, another_module)
-        end)
-    opcode_to_edge(rest, module, graph)
+  defp opcode_to_edges(module, {:test, :is_eq_exact, _, comparisons}) do
+    comparisons
+    |> Enum.filter(fn
+      {:atom, maybe_another_module} -> is_elixir_module(maybe_another_module)
+      _ -> false
+    end)
+    |> Enum.map(fn {:atom, another_module} -> {module, another_module} end)
   end
 
-  defp opcode_to_edge([_ | rest], module, graph) do
-    opcode_to_edge(rest, module, graph)
+  defp opcode_to_edges(_module, _) do
+    []
   end
 
   defp no_elixir_prefix(module) do
