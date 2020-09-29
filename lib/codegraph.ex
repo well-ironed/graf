@@ -88,15 +88,27 @@ defmodule Codegraph do
 
   defp opcode_to_edges(module, {:test, :is_eq_exact, _, comparisons}) do
     comparisons
-    |> Enum.filter(fn
-      {:atom, maybe_another_module} -> is_elixir_module(maybe_another_module)
-      _ -> false
-    end)
-    |> Enum.map(fn {:atom, another_module} -> {module, another_module} end)
+    |> select_elixir_modules()
+    |> Enum.map(&{module, &1})
+  end
+
+  defp opcode_to_edges(module, {:select_val, _, _, {:list, values}}) do
+    values
+    |> select_elixir_modules()
+    |> Enum.map(&{module, &1})
   end
 
   defp opcode_to_edges(_module, _) do
     []
+  end
+
+  defp select_elixir_modules(proplist) do
+    proplist
+    |> Enum.filter(fn
+      {:atom, maybe_another_module} -> is_elixir_module(maybe_another_module)
+      _ -> false
+    end)
+    |> Enum.map(fn {:atom, another_module} -> another_module end)
   end
 
   defp no_elixir_prefix(module) do

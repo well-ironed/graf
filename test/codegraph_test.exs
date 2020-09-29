@@ -118,9 +118,26 @@ defmodule CodegraphTest do
       [%{"name" => "A", "imports" => ["B"]}, %{"name" => "B", "imports" => []}]
   end
 
-  test "a module matching on a struct from multiple modules creates edges on the graph" do
+  test "a module matching on multiple structs creates edges on the graph" do
     # given
     project = "module_a_matches_on_a_struct_from_b_and_c"
+    project_compiled(project)
+    heb_generator_compiled()
+
+    # when
+    output = heb_generated(project)
+
+    # then
+    assert Jason.decode!(output) ==
+      [%{"name" => "A", "imports" => ["B", "C"]},
+        %{"name" => "B", "imports" => []},
+        %{"name" => "C", "imports" => []}
+      ]
+  end
+
+  test "a module matching on multiple structs in different clauses creates edges on the graph" do
+    # given
+    project = "module_a_matches_on_a_struct_from_b_and_c_in_different_clauses"
     project_compiled(project)
     heb_generator_compiled()
 
