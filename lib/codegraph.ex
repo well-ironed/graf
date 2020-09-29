@@ -32,11 +32,6 @@ defmodule Codegraph do
     source_vertices ++ sink_vertices
     |> Enum.sort_by(fn {from, _} -> from end)
     |> Enum.map(fn {source, targets} -> %{name: source, imports: Enum.uniq(targets)} end)
-    
-    #|> Graph.unique_edges()
-    #|> Graph.filter(fn from, to -> from in modules and to in modules end)
-    #|> Graph.filter(fn from, to -> from != to end)
-    #|> Graph.map(&no_elixir_prefix/1)
   end
 
   defp modules(disassembled_modules) do
@@ -100,14 +95,19 @@ defmodule Codegraph do
   end
 
   defp opcode_to_edge(
-         [
-           {:get_map_elements, _, _, {:list, [{:atom, :__struct__} | _]}},
-           {:test, :is_eq_exact, _, [_, {:atom, another_module}]} | rest
-         ],
+         [{:test, :is_eq_exact, _, comparisons} | rest],
          module,
          graph
        ) do
-    graph = Graph.add_edge(graph, module, another_module)
+      graph =
+        comparisons
+        |> Enum.filter(fn
+          {:atom, maybe_another_module} -> is_elixir_module(maybe_another_module)
+          _ -> false
+        end)
+        |> Enum.reduce(graph, fn {:atom, another_module}, graph ->
+          Graph.add_edge(graph, module, another_module)
+        end)
     opcode_to_edge(rest, module, graph)
   end
 
@@ -119,6 +119,13 @@ defmodule Codegraph do
     case Atom.to_string(module) do
       "Elixir." <> rest -> rest
       other -> other
+    end
+  end
+
+  defp is_elixir_module(maybe_module) do
+    case Atom.to_string(maybe_module) do
+      "Elixir." <> _ -> true
+       _other -> false
     end
   end
 end

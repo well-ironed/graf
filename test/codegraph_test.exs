@@ -104,6 +104,36 @@ defmodule CodegraphTest do
       [%{"name" => "A", "imports" => ["B"]}, %{"name" => "B", "imports" => []}]
   end
 
+  test "a module matching on a struct from another module creates an edge on the graph" do
+    # given
+    project = "module_a_matches_on_a_struct_from_b"
+    project_compiled(project)
+    heb_generator_compiled()
+
+    # when
+    output = heb_generated(project)
+
+    # then
+    assert Jason.decode!(output) ==
+      [%{"name" => "A", "imports" => ["B"]}, %{"name" => "B", "imports" => []}]
+  end
+
+  test "a module matching on a struct from multiple modules creates edges on the graph" do
+    # given
+    project = "module_a_matches_on_a_struct_from_b_and_c"
+    project_compiled(project)
+    heb_generator_compiled()
+
+    # when
+    output = heb_generated(project)
+
+    # then
+    assert Jason.decode!(output) ==
+      [%{"name" => "A", "imports" => ["B", "C"]},
+        %{"name" => "B", "imports" => []},
+        %{"name" => "C", "imports" => []}
+      ]
+  end
   defp project_compiled(project_name) do
     {_, 0} = System.cmd("mix", ["compile"], cd: project_dir(project_name))
   end
