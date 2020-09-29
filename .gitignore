@@ -1,0 +1,9 @@
+/_build/
+/cover/
+/deps/
+/doc/
+/.fetch
+/.generated_graphs
+erl_crash.dump
+*.ez
+codegraph-*.tar
