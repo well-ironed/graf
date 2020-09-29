@@ -14,11 +14,11 @@ defmodule Codegraph do
       |> Graph.edges()
       |> Enum.filter(fn {from, to} -> from in modules and to in modules end)
       |> Enum.reject(fn {from, to} -> from == to end)
-      #|> Enum.map(fn {from, to} -> {no_elixir_prefix(from), no_elixir_prefix(to)} end)
+      |> Enum.map(fn {from, to} -> {no_elixir_prefix(from), no_elixir_prefix(to)} end)
 
     source_vertices =
       edges
-      |> Enum.group_by(fn {from, to} -> from end)
+      |> Enum.group_by(&(elem(&1, 0)))
       |> Enum.map(fn {source, edges} -> {source, Enum.map(edges, fn {_, to} -> to end)} end)
 
     source_vertices_map = Map.new(source_vertices)
@@ -31,7 +31,7 @@ defmodule Codegraph do
 
     source_vertices ++ sink_vertices
     |> Enum.sort_by(fn {from, _} -> from end)
-    |> Enum.map(fn {source, targets} -> %{name: source, imports: Enum.uniq(targets), children: []} end)
+    |> Enum.map(fn {source, targets} -> %{name: source, imports: Enum.uniq(targets)} end)
     
     #|> Graph.unique_edges()
     #|> Graph.filter(fn from, to -> from in modules and to in modules end)
