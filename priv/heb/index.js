@@ -4,14 +4,16 @@ var jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 
 const d3 = require('d3');
-const fs = require('fs');
 const getStdin = require('get-stdin');
+const parseArgs = require('minimist');
 
 const dom = new JSDOM(`<!DOCTYPE html><body></body>`);
 
-const colorin = "#00f";
-const colorout = "#f00";
-const colornone = "#ccc";
+const args = parseArgs(
+    process.argv.slice(2),
+    {string: ["color"], default: {"color": "#ccc"}});
+
+const color = args.color;
 const width = 954;
 const radius = width / 2;
 
@@ -78,14 +80,12 @@ function hebChart(data) {
         .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
         .text(d => d.data.name)
         .each(function(d) { d.text = this; })
-        .on("mouseover", overed)
-        .on("mouseout", outed)
         .call(text => text.append("title").text(d => `${id(d)}
             ${d.outgoing.length} outgoing
             ${d.incoming.length} incoming`));
 
     const link = svg.append("g")
-        .attr("stroke", colornone)
+        .attr("stroke", color)
         .attr("fill", "none")
         .selectAll("path")
         .data(root.leaves().flatMap(leaf => leaf.outgoing))
@@ -94,31 +94,12 @@ function hebChart(data) {
         .attr("d", ([i, o]) => line(i.path(o)))
         .each(function(d) { d.path = this; });
 
-    function overed(event, d) {
-        link.style("mix-blend-mode", null);
-        d3.select(this).attr("font-weight", "bold");
-        d3.selectAll(d.incoming.map(d => d.path)).attr("stroke", colorin).raise();
-        d3.selectAll(d.incoming.map(([d]) => d.text)).attr("fill", colorin).attr("font-weight", "bold");
-        d3.selectAll(d.outgoing.map(d => d.path)).attr("stroke", colorout).raise();
-        d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr("fill", colorout).attr("font-weight", "bold");
-    }
-
-    function outed(event, d) {
-        link.style("mix-blend-mode", "multiply");
-        d3.select(this).attr("font-weight", null);
-        d3.selectAll(d.incoming.map(d => d.path)).attr("stroke", null);
-        d3.selectAll(d.incoming.map(([d]) => d.text)).attr("fill", null).attr("font-weight", null);
-        d3.selectAll(d.outgoing.map(d => d.path)).attr("stroke", null);
-        d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr("fill", null).attr("font-weight", null);
-    }
-
-    return body;
+    return body.select(".container").html();
 }
 
 (async() => {
     var input = await getStdin();
     var data = hierarchy(JSON.parse(input));
     var chart = hebChart(data);
-    var svg = chart.select(".container").html();
-    process.stdout.write(svg + "\n");
+    process.stdout.write(chart + "\n");
 })();

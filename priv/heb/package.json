@@ -9,7 +9,8 @@
   "dependencies": {
     "d3": "^6.2.0",
     "get-stdin": "^8.0.0",
-    "jsdom": "^16.4.0"
+    "jsdom": "^16.4.0",
+    "minimist": "^1.2.5"
   },
   "author": "",
   "license": "ISC"
