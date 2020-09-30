@@ -1,0 +1,16 @@
+{
+  "name": "heb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "d3": "^6.2.0",
+    "get-stdin": "^8.0.0",
+    "jsdom": "^16.4.0"
+  },
+  "author": "",
+  "license": "ISC"
+}
