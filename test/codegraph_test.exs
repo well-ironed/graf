@@ -151,6 +151,68 @@ defmodule CodegraphTest do
         %{"name" => "C", "imports" => []}
       ]
   end
+
+  test "a module calling dependency module with --max-deps-depth=0 "<>
+  "doesn't create an edge on the graph" do
+    # given
+    project = "module_a_calls_dep_without_any_deps"
+    deps_fetched_for_project(project)
+    project_compiled(project)
+    heb_generator_compiled()
+
+    # when
+    output = heb_generated(project, ["--max-deps-depth=0"])
+
+    # then
+    assert Jason.decode!(output) == [%{"name" => "A", "imports" => []}]
+  end
+
+  test "a module calling dependency module with --max-deps-depth=1 "<>
+  "creates an edge on the graph" do
+    # given
+    project = "module_a_calls_dep_without_any_deps"
+    deps_fetched_for_project(project)
+    project_compiled(project)
+    heb_generator_compiled()
+
+    # when
+    output = heb_generated(project, ["--max-deps-depth=1"])
+    IO.puts output
+
+    # then
+    assert Jason.decode!(output) == [
+      %{"name" => "A", "imports" => ["FE.Maybe"]},
+      %{"name" => "FE.Maybe", "imports" => []}
+    ]
+  end
+
+  test "a module calling dependency module with --max-deps-depth=2 "<>
+  "creates edges from module to dep and from dep to called modules" do
+    # given
+    project = "module_a_calls_dep_without_any_deps"
+    deps_fetched_for_project(project)
+    project_compiled(project)
+    heb_generator_compiled()
+
+    # when
+    output = heb_generated(project, ["--max-deps-depth=2"])
+
+    # then
+    assert Jason.decode!(output) == [
+      %{"name" => "A", "imports" => ["FE.Maybe"]},
+      %{"name" => "FE.Maybe", "imports" => ["FE.Result", "FE.Review", "FE.Maybe.Error"]},
+      %{"name" => "FE.Maybe.Error", "imports" => []},
+      %{"name" => "FE.Result", "imports" => ["FE.Maybe", "FE.Review", "FE.Result.Error"]},
+      %{"name" => "FE.Result.Error", "imports" => []},
+      %{"name" => "FE.Review", "imports" => ["FE.Maybe", "FE.Result", "FE.Review.Error"]},
+      %{"name" => "FE.Review.Error", "imports" => []}
+    ]
+  end
+
+  defp deps_fetched_for_project(project_name) do
+    {_, 0} = System.cmd("mix", ["deps.get"], cd: project_dir(project_name))
+  end
+
   defp project_compiled(project_name) do
     {_, 0} = System.cmd("mix", ["compile"], cd: project_dir(project_name))
   end
@@ -159,14 +221,16 @@ defmodule CodegraphTest do
     {_, 0} = System.cmd("mix", ["compile"])
   end
 
-  defp heb_generated(projects) when is_list(projects) do
+  defp heb_generated(projects, options \\ [])
+  defp heb_generated(projects, options) when is_list(projects) do
     projects_dirs = Enum.map(projects, &project_dir/1)
-    {output, 0} = System.cmd("mix", ["run", "priv/codegraph.exs"] ++ projects_dirs)
+    {output, 0} = System.cmd("mix",
+      ["run", "priv/codegraph.exs"] ++ options ++ projects_dirs)
     output
   end
 
-  defp heb_generated(project_name) do
-    heb_generated([project_name])
+  defp heb_generated(project_name, options) do
+    heb_generated([project_name], options)
   end
 
   defp project_dir(project_name) do

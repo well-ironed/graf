@@ -1,0 +1,3 @@
+%{
+  "fe": {:hex, :fe, "0.1.4", "e48369b4aa6248f7abae820ccf55809c22b5655db32ee6fee881b804fb446a1c", [:make, :mix], [], "hexpm", "da192bf828728f652e5f5c1b0e6216e396ebebcc3c982a4f665f8d17b391a271"},
+}
