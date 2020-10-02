@@ -29,30 +29,42 @@ function id(node) {
   return `${node.parent ? id(node.parent) + "." : ""}${node.data.name}`;
 }
 
+function idWithoutRoot(node) {
+    return id(node).split(".").slice(1);
+}
+
 function bilink(root) {
   const map = new Map(root.leaves().map(d => [id(d), d]));
-  for (const d of root.leaves()) d.incoming = [], d.outgoing = d.data.imports.map(i => [d, map.get(i)]);
-  for (const d of root.leaves()) for (const o of d.outgoing) o[1].incoming.push(o);
+  for (const d of root.leaves()) {
+      d.incoming = [];
+      d.outgoing = d.data.imports.map(i => [d, map.get(i)]);
+  }
+
+  for (const d of root.leaves()) {
+      for (const o of d.outgoing) {
+          o[1].incoming.push(o);
+      }
+  }
   return root;
 }
 
 function hierarchy(data, delimiter = ".") {
-  let root;
-  const map = new Map;
-  data.forEach(function find(data) {
-    const {name} = data;
-    if (map.has(name)) return map.get(name);
-    const i = name.lastIndexOf(delimiter);
-    map.set(name, data);
-    if (i >= 0) {
-      find({name: name.substring(0, i), children: []}).children.push(data);
-      data.name = name.substring(i + 1);
-    } else {
-      root = data;
-    }
-    return data;
-  });
-  return root;
+    let root;
+    const map = new Map;
+    data.forEach(function(d) {
+        d.name = 'root.' + d.name;
+        d.imports = d.imports.map(i => 'root.' + i);
+    });
+    data.forEach(function find(data) {
+        const {name} = data;
+        if (map.has(name)) return map.get(name);
+        const i = name.lastIndexOf(delimiter);
+        map.set(name, data);
+        find({name: name.substring(0, i), children: []}).children.push(data);
+        data.name = name.substring(i + 1);
+        return data;
+    });
+    return {name: 'root', children: data, imports: []};
 }
 
 function hebChart(data) {
@@ -80,7 +92,7 @@ function hebChart(data) {
         .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
         .text(d => d.data.name)
         .each(function(d) { d.text = this; })
-        .call(text => text.append("title").text(d => `${id(d)}
+        .call(text => text.append("title").text(d => `${idWithoutRoot(d)}
             ${d.outgoing.length} outgoing
             ${d.incoming.length} incoming`));
 

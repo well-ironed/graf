@@ -1,14 +1,14 @@
 defmodule CodegraphTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   test "a module calling another module creates an edge on the graph" do
     # given
     project = "module_a_calls_b"
     project_compiled(project)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated(project)
+    output = graph_generated(project)
 
     # then
     assert Jason.decode!(output) ==
@@ -19,10 +19,10 @@ defmodule CodegraphTest do
     # given
     project = "module_a_calls_b_no_tail_recursion"
     project_compiled(project)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated(project)
+    output = graph_generated(project)
 
     # then
     assert Jason.decode!(output) ==
@@ -33,10 +33,10 @@ defmodule CodegraphTest do
     # given
     project = "module_a_calls_b_and_b_calls_a"
     project_compiled(project)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated(project)
+    output = graph_generated(project)
 
     # then
     assert Jason.decode!(output) ==
@@ -47,10 +47,10 @@ defmodule CodegraphTest do
     # given
     project = "module_a_references_function_from_b"
     project_compiled(project)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated(project)
+    output = graph_generated(project)
 
     # then
     assert Jason.decode!(output) ==
@@ -61,10 +61,10 @@ defmodule CodegraphTest do
     # given
     project = "module_a_calls_b_in_umbrella"
     project_compiled(project)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated(project)
+    output = graph_generated(project)
 
     # then
     assert Jason.decode!(output) ==
@@ -77,10 +77,10 @@ defmodule CodegraphTest do
     project2 = "module_c_calls_b"
     project_compiled(project1)
     project_compiled(project2)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated([project1, project2])
+    output = graph_generated([project1, project2])
 
     # then
     assert Jason.decode!(output) ==
@@ -94,10 +94,10 @@ defmodule CodegraphTest do
     # given
     project = "module_a_uses_struct_from_b"
     project_compiled(project)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated(project)
+    output = graph_generated(project)
 
     # then
     assert Jason.decode!(output) ==
@@ -108,10 +108,10 @@ defmodule CodegraphTest do
     # given
     project = "module_a_matches_on_a_struct_from_b"
     project_compiled(project)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated(project)
+    output = graph_generated(project)
 
     # then
     assert Jason.decode!(output) ==
@@ -122,10 +122,10 @@ defmodule CodegraphTest do
     # given
     project = "module_a_matches_on_a_struct_from_b_and_c"
     project_compiled(project)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated(project)
+    output = graph_generated(project)
 
     # then
     assert Jason.decode!(output) ==
@@ -139,10 +139,10 @@ defmodule CodegraphTest do
     # given
     project = "module_a_matches_on_a_struct_from_b_and_c_in_different_clauses"
     project_compiled(project)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated(project)
+    output = graph_generated(project)
 
     # then
     assert Jason.decode!(output) ==
@@ -158,10 +158,10 @@ defmodule CodegraphTest do
     project = "module_a_calls_dep_without_any_deps"
     deps_fetched_for_project(project)
     project_compiled(project)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated(project, ["--max-deps-depth=0"])
+    output = graph_generated(project, ["--max-deps-depth=0"])
 
     # then
     assert Jason.decode!(output) == [%{"name" => "A", "imports" => []}]
@@ -173,10 +173,10 @@ defmodule CodegraphTest do
     project = "module_a_calls_dep_without_any_deps"
     deps_fetched_for_project(project)
     project_compiled(project)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated(project, ["--max-deps-depth=1"])
+    output = graph_generated(project, ["--max-deps-depth=1"])
     IO.puts output
 
     # then
@@ -192,10 +192,10 @@ defmodule CodegraphTest do
     project = "module_a_calls_dep_without_any_deps"
     deps_fetched_for_project(project)
     project_compiled(project)
-    heb_generator_compiled()
+    graph_generator_compiled()
 
     # when
-    output = heb_generated(project, ["--max-deps-depth=2"])
+    output = graph_generated(project, ["--max-deps-depth=2"])
 
     # then
     assert Jason.decode!(output) == [
@@ -217,20 +217,20 @@ defmodule CodegraphTest do
     {_, 0} = System.cmd("mix", ["compile"], cd: project_dir(project_name))
   end
 
-  defp heb_generator_compiled do
+  defp graph_generator_compiled do
     {_, 0} = System.cmd("mix", ["compile"])
   end
 
-  defp heb_generated(projects, options \\ [])
-  defp heb_generated(projects, options) when is_list(projects) do
+  defp graph_generated(projects, options \\ [])
+  defp graph_generated(projects, options) when is_list(projects) do
     projects_dirs = Enum.map(projects, &project_dir/1)
     {output, 0} = System.cmd("mix",
       ["run", "priv/codegraph.exs"] ++ options ++ projects_dirs)
     output
   end
 
-  defp heb_generated(project_name, options) do
-    heb_generated([project_name], options)
+  defp graph_generated(project_name, options) do
+    graph_generated([project_name], options)
   end
 
   defp project_dir(project_name) do
