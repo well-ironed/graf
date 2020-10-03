@@ -132,6 +132,11 @@ defmodule Codegraph do
     [{module, another_module}]
   end
 
+  defp opcode_to_edges(module,
+    {:call_ext_last, _, {:extfunc, another_module, _, _}, _}) do
+    [{module, another_module}]
+  end
+
   defp opcode_to_edges(module, {:call_ext, _, {:extfunc, another_module, _, _}}) do
     [{module, another_module}]
   end

@@ -206,6 +206,42 @@ defmodule CodegraphTest do
     ]
   end
 
+  test "a module calling dependency module with --max-deps-depth=0 "<>
+  "in an umbrella up creates an edge on the graph" do
+    # given
+    project = "modules_a_and_b_call_dep_in_an_umbrella"
+    deps_fetched_for_project(project)
+    project_compiled(project)
+    graph_generator_compiled()
+
+    # when
+    output = graph_generated(project, ["--max-deps-depth=0"])
+
+    # then
+    assert Jason.decode!(output) == [
+      %{"name" => "A", "imports" => ["B"]},
+      %{"name" => "B", "imports" => []}
+    ]
+  end
+
+  test "a module calling dependency module with --max-deps-depth=1 "<>
+  "in an umbrella up creates an edge on the graph" do
+    # given
+    project = "modules_a_and_b_call_dep_in_an_umbrella"
+    deps_fetched_for_project(project)
+    project_compiled(project)
+    graph_generator_compiled()
+
+    # when
+    output = graph_generated(project, ["--max-deps-depth=1"])
+
+    # then
+    assert Jason.decode!(output) == [
+      %{"name" => "A", "imports" => ["B", "FE.Maybe"]},
+      %{"name" => "B", "imports" => ["FE.Maybe"]},
+      %{"name" => "FE.Maybe", "imports" => []}
+    ]
+  end
   defp deps_fetched_for_project(project_name) do
     {_, 0} = System.cmd("mix", ["deps.get"], cd: project_dir(project_name))
   end
