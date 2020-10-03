@@ -242,6 +242,38 @@ defmodule CodegraphTest do
       %{"name" => "FE.Maybe", "imports" => []}
     ]
   end
+
+  test "a module calling Enum without --builtin doesn't create an edge on the graph" do
+    # given
+    project = "module_a_calls_enum"
+    deps_fetched_for_project(project)
+    project_compiled(project)
+    graph_generator_compiled()
+
+    # when
+    output = graph_generated(project, [])
+
+    # then
+    assert Jason.decode!(output) == []
+  end
+
+  test "a module calling Enum with --builtin creates an edge on the graph" do
+    # given
+    project = "module_a_calls_enum"
+    deps_fetched_for_project(project)
+    project_compiled(project)
+    graph_generator_compiled()
+
+    # when
+    output = graph_generated(project, ["--builtin"])
+
+    # then
+    assert Jason.decode!(output) == [
+      %{"name" => "A", "imports" => ["Enum"]},
+      %{"name" => "Enum", "imports" => []}
+    ]
+  end
+
   defp deps_fetched_for_project(project_name) do
     {_, 0} = System.cmd("mix", ["deps.get"], cd: project_dir(project_name))
   end

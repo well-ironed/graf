@@ -2,7 +2,7 @@ defmodule Codegraph do
   alias Codegraph.Graph
   alias MapSet, as: Set
 
-  def from_projects(projects_dirs, max_deps_depth \\ 0) do
+  def from_projects(projects_dirs, max_deps_depth \\ 0, include_builtin \\ false) do
     disassembled_project_modules =
       projects_dirs
       |> Enum.flat_map(&project_beam_files/1)
@@ -11,6 +11,9 @@ defmodule Codegraph do
     disassembled_deps_modules =
       projects_dirs |> Enum.flat_map(&deps_beam_files/1)
       |> Enum.map(&:beam_disasm.file/1)
+
+    project_modules = modules(disassembled_project_modules)
+    deps_modules = modules(disassembled_deps_modules)
 
     edges = 
       Enum.reduce(
@@ -22,12 +25,19 @@ defmodule Codegraph do
       |> Enum.group_by(&elem(&1, 0))
       |> Enum.into(%{}, fn {f, fts} -> {f, Enum.map(fts, &elem(&1, 1))} end)
 
-    modules = modules(
-      disassembled_project_modules, disassembled_deps_modules, edges_as_map, max_deps_depth)
+    modules = modules(project_modules, deps_modules, edges_as_map, max_deps_depth)
+
+    builtin_modules =
+      Set.difference(
+        Set.new(Map.values(edges_as_map) |> List.flatten()),
+        Set.new(project_modules ++ deps_modules)
+      )
 
     edges =
       edges
-      |> Enum.filter(fn {from, to} -> from in modules and to in modules end)
+      |> Enum.filter(fn {from, to} ->
+        from in modules and (to in modules or (include_builtin and to in builtin_modules))
+      end)
       |> Enum.reject(fn {from, to} -> from == to end)
       |> Enum.map(fn {from, to} -> {no_elixir_prefix(from), no_elixir_prefix(to)} end)
 
@@ -50,12 +60,9 @@ defmodule Codegraph do
   end
 
   defp modules(project_modules, _deps_modules, _edges, 0) do
-    project_modules |> modules() |> Set.new()
+    project_modules |> Set.new()
   end
   defp modules(project_modules, deps_modules, edges, max_deps_depth) do
-    project_modules = modules(project_modules)
-    deps_modules = modules(deps_modules)
-
     modules = Set.new(project_modules)
 
     Enum.reduce(1..max_deps_depth, modules, fn _, ms ->

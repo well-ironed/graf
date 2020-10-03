@@ -179,6 +179,24 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     """
   end
 
+  test "HEB graph is generated for the `module_a_calls_enum` project with " <>
+    "builtin modules included" do
+    # given
+    project = "module_a_calls_enum"
+
+    # when
+    output = svg_generated(project, ["--builtin"])
+
+    # then
+    assert output == """
+    <svg viewBox="-477,-477,954,954" xmlns="http://www.w3.org/2000/svg"><g font-family="sans-serif" font-size="10"><g transform="rotate(0) translate(377,0)"><text dy="0.31em" x="6" text-anchor="start">A<title>A
+                1 outgoing
+                0 incoming</title></text></g><g transform="rotate(180) translate(377,0)"><text dy="0.31em" x="-6" text-anchor="end" transform="rotate(180)">Enum<title>Enum
+                0 outgoing
+                1 incoming</title></text></g></g><g stroke="#ccc" fill="none"><path style="mix-blend-mode: multiply;" d="M377,-2.3084592163927607e-14L314.1666666666667,-1.866004533250815e-14C251.33333333333334,-1.4235498501088692e-14,125.66666666666667,-5.386404838249774e-15,0,1.0003323271035294e-14C-125.66666666666667,2.5393051380320365e-14,-251.33333333333334,4.7323413936051595e-14,-314.1666666666667,5.828859521391721e-14L-377,6.925377649178281e-14"></path></g></svg>
+    """
+  end
+
   defp svg_generated(projects, options \\ [])
   defp svg_generated(projects, options) when is_list(projects) do
     project_dirs = Enum.map(projects, &project_dir/1)
