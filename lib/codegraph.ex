@@ -1,17 +1,32 @@
 defmodule Codegraph do
   alias Codegraph.Graph
+  alias MapSet, as: Set
 
-  def from_projects(projects_dirs) do
-    disassembled_modules =
+  def from_projects(projects_dirs, max_deps_depth \\ 0) do
+    disassembled_project_modules =
       projects_dirs
-      |> Enum.flat_map(&beam_files/1)
+      |> Enum.flat_map(&project_beam_files/1)
       |> Enum.map(&:beam_disasm.file/1)
 
-    modules = modules(disassembled_modules)
+    disassembled_deps_modules =
+      projects_dirs |> Enum.flat_map(&deps_beam_files/1)
+      |> Enum.map(&:beam_disasm.file/1)
 
     edges = 
-      Enum.reduce(disassembled_modules, Graph.new(), &module_calls/2)
+      Enum.reduce(
+        disassembled_project_modules ++ disassembled_deps_modules, Graph.new(), &module_calls/2)
       |> Graph.edges()
+
+    edges_as_map =
+      edges
+      |> Enum.group_by(&elem(&1, 0))
+      |> Enum.into(%{}, fn {f, fts} -> {f, Enum.map(fts, &elem(&1, 1))} end)
+
+    modules = modules(
+      disassembled_project_modules, disassembled_deps_modules, edges_as_map, max_deps_depth)
+
+    edges =
+      edges
       |> Enum.filter(fn {from, to} -> from in modules and to in modules end)
       |> Enum.reject(fn {from, to} -> from == to end)
       |> Enum.map(fn {from, to} -> {no_elixir_prefix(from), no_elixir_prefix(to)} end)
@@ -34,13 +49,63 @@ defmodule Codegraph do
     |> Enum.map(fn {source, targets} -> %{name: source, imports: Enum.uniq(targets)} end)
   end
 
+  defp modules(project_modules, _deps_modules, _edges, 0) do
+    project_modules |> modules() |> Set.new()
+  end
+  defp modules(project_modules, deps_modules, edges, max_deps_depth) do
+    project_modules = modules(project_modules)
+    deps_modules = modules(deps_modules)
+
+    modules = Set.new(project_modules)
+
+    Enum.reduce(1..max_deps_depth, modules, fn _, ms ->
+      Enum.flat_map(ms, &Map.get(edges, &1, []))
+      |> Enum.reduce(ms, &Set.put(&2, &1))
+    end)
+    |> Enum.filter(fn m -> m in project_modules or m in deps_modules end)
+  end
+
   defp modules(disassembled_modules) do
     disassembled_modules
     |> Enum.map(fn {:beam_file, module, _, _, _, _} -> module end)
   end
 
-  defp beam_files(project_dir) do
-    [project_dir, "**", "ebin", "*.beam"]
+  defp project_beam_files(project_dir) do
+    project_dir
+    |> compile_paths()
+    |> Enum.flat_map(&beam_files(&1))
+  end
+
+  defp compile_paths(project_dir) do
+    case System.cmd(
+      "mix", ["run", "-e", "IO.puts Mix.Project.umbrella?()"],
+      cd: project_dir) do
+      {"false\n", 0} ->
+        [compile_path(project_dir)]
+      {"true\n", 0} ->
+        [project_dir, "apps", "*"]
+        |> Path.join()
+        |> Path.wildcard()
+        |> Enum.map(&compile_path/1)
+    end
+  end
+
+  defp compile_path(dir) do
+    {compile_path, 0} = System.cmd(
+      "mix", ["run", "-e", "IO.puts Mix.Project.compile_path()"],
+      cd: dir)
+    String.trim(compile_path) |> Path.split()
+  end
+
+  defp deps_beam_files(project_dir) do
+    all = Set.new(beam_files([project_dir, "**", "ebin"]))
+    project = Set.new(project_beam_files(project_dir))
+
+    Set.difference(all, project) |> Set.to_list()
+  end
+
+  defp beam_files(dir) do
+    dir ++ ["*.beam"]
     |> Path.join()
     |> Path.wildcard()
     |> Enum.map(&String.to_charlist/1)

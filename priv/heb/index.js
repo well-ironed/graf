@@ -22,22 +22,23 @@ var line = d3.lineRadial()
     .radius(d => d.y)
     .angle(d => d.x);
 
-var tree = d3.cluster()
-    .size([2 * Math.PI, radius - 100]);
+var tree = d3.cluster() .size([2 * Math.PI, radius - 100]);
 
 function id(node) {
   return `${node.parent ? id(node.parent) + "." : ""}${node.data.name}`;
 }
 
 function idWithoutRoot(node) {
-    return id(node).split(".").slice(1);
+    return id(node).split(".").slice(1).join(".");
 }
 
 function bilink(root) {
-  const map = new Map(root.leaves().map(d => [id(d), d]));
+  const map = new Map(root.leaves().map(d => [idWithoutRoot(d), d]));
   for (const d of root.leaves()) {
       d.incoming = [];
-      d.outgoing = d.data.imports.map(i => [d, map.get(i)]);
+      d.outgoing = d.data.imports.map(function(i) {
+          return [d, map.get(i)];
+      });
   }
 
   for (const d of root.leaves()) {
@@ -49,22 +50,11 @@ function bilink(root) {
 }
 
 function hierarchy(data, delimiter = ".") {
-    let root;
-    const map = new Map;
     data.forEach(function(d) {
-        d.name = 'root.' + d.name;
-        d.imports = d.imports.map(i => 'root.' + i);
+        d.children = [];
     });
-    data.forEach(function find(data) {
-        const {name} = data;
-        if (map.has(name)) return map.get(name);
-        const i = name.lastIndexOf(delimiter);
-        map.set(name, data);
-        find({name: name.substring(0, i), children: []}).children.push(data);
-        data.name = name.substring(i + 1);
-        return data;
-    });
-    return {name: 'root', children: data, imports: []};
+
+    return {name: 'root', children: data};
 }
 
 function hebChart(data) {
@@ -90,7 +80,7 @@ function hebChart(data) {
         .attr("x", d => d.x < Math.PI ? 6 : -6)
         .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
         .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
-        .text(d => d.data.name)
+        .text(d => d.data.name.split(".").slice(-1).pop())
         .each(function(d) { d.text = this; })
         .call(text => text.append("title").text(d => `${idWithoutRoot(d)}
             ${d.outgoing.length} outgoing

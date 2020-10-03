@@ -164,7 +164,7 @@ defmodule CodegraphTest do
     output = graph_generated(project, ["--max-deps-depth=0"])
 
     # then
-    assert Jason.decode!(output) == [%{"name" => "A", "imports" => []}]
+    assert Jason.decode!(output) == []
   end
 
   test "a module calling dependency module with --max-deps-depth=1 "<>
@@ -177,7 +177,6 @@ defmodule CodegraphTest do
 
     # when
     output = graph_generated(project, ["--max-deps-depth=1"])
-    IO.puts output
 
     # then
     assert Jason.decode!(output) == [
@@ -202,10 +201,8 @@ defmodule CodegraphTest do
       %{"name" => "A", "imports" => ["FE.Maybe"]},
       %{"name" => "FE.Maybe", "imports" => ["FE.Result", "FE.Review", "FE.Maybe.Error"]},
       %{"name" => "FE.Maybe.Error", "imports" => []},
-      %{"name" => "FE.Result", "imports" => ["FE.Maybe", "FE.Review", "FE.Result.Error"]},
-      %{"name" => "FE.Result.Error", "imports" => []},
-      %{"name" => "FE.Review", "imports" => ["FE.Maybe", "FE.Result", "FE.Review.Error"]},
-      %{"name" => "FE.Review.Error", "imports" => []}
+      %{"name" => "FE.Result", "imports" => ["FE.Maybe", "FE.Review"]},
+      %{"name" => "FE.Review", "imports" => ["FE.Maybe", "FE.Result"]}
     ]
   end
 
