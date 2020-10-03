@@ -48,15 +48,12 @@ defmodule Codegraph.GraphTest do
 
   test "edges can be mapped" do
     g = Graph.new()
-    g = Graph.add_edge(g, "1", "2")
+    g = Graph.add_edge(g, 1, 2)
 
     g =
-      Graph.map(g, fn
-        "1" -> "one"
-        "2" -> "two"
-      end)
+      Graph.map(g, fn x, y -> {x*2, y+3} end)
 
-    assert Graph.edges(g) == [{"one", "two"}]
+    assert Graph.edges(g) == [{2, 5}]
   end
 
 
@@ -66,5 +63,67 @@ defmodule Codegraph.GraphTest do
     g = Graph.add_edge(g, "b", "c")
 
     assert Graph.edges(g) == [{"a", "b"}, {"b", "c"}]
+  end
+
+  test "a empty graph can be represented as a map" do
+    g = Graph.new()
+    assert Graph.to_map(g) == %{}
+  end
+
+  test "a graph with two edges can be represented as map of source and target vertex" do
+    g = Graph.new()
+    g = Graph.add_edge(g, "a", "b")
+    g = Graph.add_edge(g, "b", "a")
+    assert Graph.to_map(g) == %{"a" => ["b"], "b" => ["a"]}
+  end
+
+  test "a graph with a vertex without outgoing edges is returned in the map" do
+    g = Graph.new()
+    g = Graph.add_edge(g, "a", "b")
+    assert Graph.to_map(g) == %{"a" => ["b"], "b" => []}
+  end
+
+  test "a graph with vertex that's a target to multiple vertices is returned once" do
+    g = Graph.new()
+    g = Graph.add_edge(g, "a", "c")
+    g = Graph.add_edge(g, "b", "c")
+    assert Graph.to_map(g) == %{"a" => ["c"], "b" => ["c"], "c" => []}
+  end
+
+  test "a graph with more edges can be represented as map of source and target vertex" do
+    g = Graph.new()
+    g = Graph.add_edge(g, "a", "b")
+    g = Graph.add_edge(g, "a", "c")
+    g = Graph.add_edge(g, "A", "d")
+    g = Graph.add_edge(g, "A", "e")
+    g = Graph.add_edge(g, "A", "f")
+    assert Graph.to_map(g) == %{
+      "a" => ["c", "b"],
+      "A" => ["f", "e", "d"],
+      "b" => [],
+      "c" => [],
+      "d" => [],
+      "e" => [],
+      "f" => []
+    }
+  end
+
+  test "all vertices can be returned for an empty graph" do
+    g = Graph.new()
+    assert Graph.vertices(g) == []
+  end
+
+  test "all vertices can be returned for a graph with one edge" do
+    g = Graph.new()
+    g = Graph.add_edge(g, "a", "b")
+    assert Graph.vertices(g) == ["a", "b"]
+  end
+
+  test "all vertices can be returned for a graph with more edges" do
+    g = Graph.new()
+    g = Graph.add_edge(g, "a", "b")
+    g = Graph.add_edge(g, "b", "c")
+    g = Graph.add_edge(g, "b", "d")
+    assert Graph.vertices(g) == ["b", "d", "c", "a"]
   end
 end

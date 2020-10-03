@@ -199,7 +199,7 @@ defmodule CodegraphTest do
     # then
     assert Jason.decode!(output) == [
       %{"name" => "A", "imports" => ["FE.Maybe"]},
-      %{"name" => "FE.Maybe", "imports" => ["FE.Result", "FE.Review", "FE.Maybe.Error"]},
+      %{"name" => "FE.Maybe", "imports" => ["FE.Maybe.Error", "FE.Result", "FE.Review"]},
       %{"name" => "FE.Maybe.Error", "imports" => []},
       %{"name" => "FE.Result", "imports" => ["FE.Maybe", "FE.Review"]},
       %{"name" => "FE.Review", "imports" => ["FE.Maybe", "FE.Result"]}
@@ -345,10 +345,10 @@ defmodule CodegraphTest do
     # then
     assert Jason.decode!(output) == [
       %{"name" => "A", "imports" => ["B", "FE.Maybe", "List"]},
-      %{"name" => "B", "imports" => ["FE.Maybe", "Enum"]},
+      %{"name" => "B", "imports" => ["Enum", "FE.Maybe"]},
       %{"name" => "Enum", "imports" => []},
       %{"name" => "Enum.EmptyError", "imports" => []},
-      %{"name" => "FE.Maybe", "imports" => ["Enum.EmptyError", "erlang", "Enum"]},
+      %{"name" => "FE.Maybe", "imports" => ["Enum", "Enum.EmptyError", "erlang"]},
       %{"name" => "List", "imports" => []},
       %{"name" => "erlang", "imports" => []}
     ]
