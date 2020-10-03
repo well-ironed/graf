@@ -354,6 +354,23 @@ defmodule CodegraphTest do
     ]
   end
 
+  test "a module calling protocol implementation creates an edge on the graph" do
+    # given
+    project = "module_a_calls_protocol"
+    project_compiled(project)
+    graph_generator_compiled()
+
+    # when
+    output = graph_generated(project)
+
+    # then
+    assert Jason.decode!(output) ==
+      [%{"name" => "A", "imports" => ["FooProtocol"]},
+       %{"name" => "FooProtocol", "imports" => ["FooProtocol.Map"]},
+       %{"name" => "FooProtocol.Map", "imports" => []}
+      ]
+  end
+
   defp deps_fetched_for_project(project_name) do
     {_, 0} = System.cmd("mix", ["deps.get"], cd: project_dir(project_name))
   end
