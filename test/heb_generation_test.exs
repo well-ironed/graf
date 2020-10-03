@@ -197,6 +197,94 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     """
   end
 
+  test "HEB graph is generated for the `module_a_calls_enum` project without " <>
+    "builtin modules and no deps" do
+    # given
+    project = "modules_a_and_b_call_dep_and_builtin_in_an_umbrella"
+
+    # when
+    output = svg_generated(project, ["--max-deps-depth=0"])
+
+    # then
+    assert output == """
+    <svg viewBox="-477,-477,954,954" xmlns="http://www.w3.org/2000/svg"><g font-family="sans-serif" font-size="10"><g transform="rotate(0) translate(377,0)"><text dy="0.31em" x="6" text-anchor="start">A<title>A
+                1 outgoing
+                0 incoming</title></text></g><g transform="rotate(180) translate(377,0)"><text dy="0.31em" x="-6" text-anchor="end" transform="rotate(180)">B<title>B
+                0 outgoing
+                1 incoming</title></text></g></g><g stroke="#ccc" fill="none"><path style="mix-blend-mode: multiply;" d="M377,-2.3084592163927607e-14L314.1666666666667,-1.866004533250815e-14C251.33333333333334,-1.4235498501088692e-14,125.66666666666667,-5.386404838249774e-15,0,1.0003323271035294e-14C-125.66666666666667,2.5393051380320365e-14,-251.33333333333334,4.7323413936051595e-14,-314.1666666666667,5.828859521391721e-14L-377,6.925377649178281e-14"></path></g></svg>
+    """
+  end
+
+  test "HEB graph is generated for the `module_a_calls_enum` project with " <>
+    "builtin modules and no deps" do
+    # given
+    project = "modules_a_and_b_call_dep_and_builtin_in_an_umbrella"
+
+    # when
+    output = svg_generated(project, ["--max-deps-depth=0", "--builtin"])
+
+    # then
+    assert output == """
+    <svg viewBox="-477,-477,954,954" xmlns="http://www.w3.org/2000/svg"><g font-family="sans-serif" font-size="10"><g transform="rotate(-45) translate(377,0)"><text dy="0.31em" x="6" text-anchor="start">A<title>A
+                2 outgoing
+                0 incoming</title></text></g><g transform="rotate(45) translate(377,0)"><text dy="0.31em" x="6" text-anchor="start">B<title>B
+                1 outgoing
+                1 incoming</title></text></g><g transform="rotate(135) translate(377,0)"><text dy="0.31em" x="-6" text-anchor="end" transform="rotate(180)">Enum<title>Enum
+                0 outgoing
+                1 incoming</title></text></g><g transform="rotate(225) translate(377,0)"><text dy="0.31em" x="-6" text-anchor="end" transform="rotate(180)">List<title>List
+                0 outgoing
+                1 incoming</title></text></g></g><g stroke="#ccc" fill="none"><path style="mix-blend-mode: multiply;" d="M266.5792565073284,-266.5792565073284L228.8138618354569,-222.14938042277367C191.04846716358534,-177.71950433821894,115.51767781984232,-88.85975216910947,115.51767781984232,0C115.51767781984232,88.85975216910947,191.04846716358534,177.71950433821894,228.8138618354569,222.14938042277367L266.5792565073284,266.5792565073284"></path><path style="mix-blend-mode: multiply;" d="M266.5792565073284,-266.5792565073284L222.14938042277367,-228.8138618354569C177.71950433821894,-191.04846716358534,88.85975216910947,-115.51767781984232,-9.473903143468002e-15,-115.51767781984229C-88.85975216910948,-115.51767781984229,-177.71950433821897,-191.04846716358531,-222.1493804227737,-228.81386183545683L-266.57925650732847,-266.57925650732835"></path><path style="mix-blend-mode: multiply;" d="M266.5792565073284,266.5792565073284L222.14938042277367,228.8138618354569C177.71950433821894,191.04846716358534,88.85975216910947,115.51767781984232,0,115.51767781984233C-88.85975216910947,115.51767781984233,-177.71950433821894,191.0484671635854,-222.14938042277367,228.81386183545692L-266.5792565073284,266.57925650732847"></path></g></svg>
+    """
+  end
+
+  test "HEB graph is generated for the `module_a_calls_enum` project without " <>
+    "builtin modules and with one level of deps" do
+    # given
+    project = "modules_a_and_b_call_dep_and_builtin_in_an_umbrella"
+
+    # when
+    output = svg_generated(project, ["--max-deps-depth=1"])
+
+    # then
+    assert output == """
+    <svg viewBox="-477,-477,954,954" xmlns="http://www.w3.org/2000/svg"><g font-family="sans-serif" font-size="10"><g transform="rotate(-30.000000000000007) translate(377,0)"><text dy="0.31em" x="6" text-anchor="start">A<title>A
+                2 outgoing
+                0 incoming</title></text></g><g transform="rotate(90) translate(377,0)"><text dy="0.31em" x="-6" text-anchor="end" transform="rotate(180)">B<title>B
+                1 outgoing
+                1 incoming</title></text></g><g transform="rotate(210.00000000000006) translate(377,0)"><text dy="0.31em" x="-6" text-anchor="end" transform="rotate(180)">Maybe<title>FE.Maybe
+                0 outgoing
+                2 incoming</title></text></g></g><g stroke="#ccc" fill="none"><path style="mix-blend-mode: multiply;" d="M326.49157722673334,-188.50000000000003L276.1574590709453,-154.72708333333335C225.82334091515725,-120.9541666666667,125.15510460358111,-53.40833333333334,70.73984173245891,40.84166666666666C16.32457886133669,135.09166666666667,8.162289430668368,256.04583333333335,4.081144715334208,316.5229166666667L4.7770319507798133e-14,377"></path><path style="mix-blend-mode: multiply;" d="M326.49157722673334,-188.50000000000003L272.07631435561115,-161.79583333333335C217.6610514844889,-135.0916666666667,108.83052574224445,-81.68333333333335,0,-81.68333333333335C-108.83052574224445,-81.68333333333335,-217.6610514844889,-135.0916666666667,-272.07631435561115,-161.79583333333335L-326.49157722673334,-188.50000000000003"></path><path style="mix-blend-mode: multiply;" d="M4.6169184327855214e-14,377L-4.081144715334128,316.5229166666667C-8.162289430668302,256.04583333333335,-16.32457886133665,135.09166666666667,-70.73984173245888,40.84166666666666C-125.15510460358111,-53.40833333333334,-225.82334091515722,-120.9541666666667,-276.1574590709453,-154.72708333333335L-326.49157722673334,-188.50000000000003"></path></g></svg>
+    """
+  end
+
+  test "HEB graph is generated for the `module_a_calls_enum` project with " <>
+    "builtin modules and with one level of deps" do
+    # given
+    project = "modules_a_and_b_call_dep_and_builtin_in_an_umbrella"
+
+    # when
+    output = svg_generated(project, ["--max-deps-depth=1", "--builtin"])
+
+    # then
+    assert output == """
+    <svg viewBox="-477,-477,954,954" xmlns="http://www.w3.org/2000/svg"><g font-family="sans-serif" font-size="10"><g transform="rotate(-64.28571428571428) translate(377,0)"><text dy="0.31em" x="6" text-anchor="start">A<title>A
+                3 outgoing
+                0 incoming</title></text></g><g transform="rotate(-12.857142857142847) translate(377,0)"><text dy="0.31em" x="6" text-anchor="start">B<title>B
+                2 outgoing
+                1 incoming</title></text></g><g transform="rotate(38.571428571428555) translate(377,0)"><text dy="0.31em" x="6" text-anchor="start">Enum<title>Enum
+                0 outgoing
+                2 incoming</title></text></g><g transform="rotate(90) translate(377,0)"><text dy="0.31em" x="-6" text-anchor="end" transform="rotate(180)">EmptyError<title>Enum.EmptyError
+                0 outgoing
+                1 incoming</title></text></g><g transform="rotate(141.42857142857142) translate(377,0)"><text dy="0.31em" x="-6" text-anchor="end" transform="rotate(180)">Maybe<title>FE.Maybe
+                3 outgoing
+                2 incoming</title></text></g><g transform="rotate(192.85714285714283) translate(377,0)"><text dy="0.31em" x="-6" text-anchor="end" transform="rotate(180)">List<title>List
+                0 outgoing
+                1 incoming</title></text></g><g transform="rotate(244.28571428571428) translate(377,0)"><text dy="0.31em" x="-6" text-anchor="end" transform="rotate(180)">erlang<title>erlang
+                0 outgoing
+                1 incoming</title></text></g></g><g stroke="#ccc" fill="none"><path style="mix-blend-mode: multiply;" d="M163.57416964731942,-339.665263199212L142.95083294618118,-288.3488316906026C122.32749624504295,-237.03240018199324,81.0808228427665,-134.39953716477447,115.07643171697117,-91.77039198182756C149.07204059117586,-49.14124679888065,258.3099317418617,-66.5158194502056,312.9288773172046,-75.20310577586808L367.5478228925475,-83.89039210153055"></path><path style="mix-blend-mode: multiply;" d="M163.57416964731942,-339.665263199212L134.67210429889374,-284.36200609807423C105.77003895046808,-229.0587489969364,47.96590825361675,-118.4522347946608,-28.42153150267768,-22.665415044668368C-104.80897125897211,73.12140470532407,-199.77972007470964,154.08853000303336,-247.2650944825784,194.57209265188797L-294.75046889044717,235.05565530074261"></path><path style="mix-blend-mode: multiply;" d="M163.57416964731942,-339.665263199212L133.7621373738675,-288.3488316906026C103.95010510041557,-237.03240018199324,44.32604055351174,-134.39953716477447,-44.19429153646609,-91.77039198182753C-132.7146236264439,-49.141246798880616,-250.13122325949573,-66.51581945020554,-308.8395230760216,-75.203105775868L-367.5478228925475,-83.89039210153047"></path><path style="mix-blend-mode: multiply;" d="M367.5478228925475,-83.89039210153055L307.1998193354826,-68.01909429461864C246.85181577841752,-52.14779648770673,126.15580866428752,-20.405200873882915,15.772760033788407,32.752473693162614C-94.6102885967107,85.91014826020815,-194.68037874357893,160.48290178047537,-244.71542381701303,197.769278540609L-294.75046889044717,235.05565530074261"></path><path style="mix-blend-mode: multiply;" d="M367.5478228925475,-83.89039210153055L314.5685810577437,-68.01909429461864C261.5893392229399,-52.147796487706735,155.63085555333225,-20.40520087388292,143.49796321964888,32.75247369316259C131.3650708859655,85.91014826020812,213.0577698882064,160.48290178047532,253.90411938932684,197.76927854060895L294.7504688904473,235.05565530074253"></path><path style="mix-blend-mode: multiply;" d="M-294.75046889044717,235.05565530074261L-249.30977160316988,203.53040844187817C-203.86907431589262,172.00516158301366,-112.98767974133807,108.95466786528466,-63.86260159293021,132.61205864849424C-14.73752344452234,156.2694494317038,-7.368761722261147,266.6347247158519,-3.6843808611305495,321.81736235792596L4.7770319507798133e-14,377"></path><path style="mix-blend-mode: multiply;" d="M-294.75046889044717,235.05565530074261L-251.35444872376138,194.57209265188797C-207.95842855707562,154.08853000303336,-121.16638822370406,73.12140470532407,-99.30367168318277,-22.665415044668354C-77.44095514266151,-118.45223479466078,-120.5075623949905,-229.05874899693637,-142.040866021155,-284.3620060980742L-163.5741696473195,-339.66526319921195"></path><path style="mix-blend-mode: multiply;" d="M-294.75046889044717,235.05565530074261L-245.6253907420393,201.75610413313743C-196.50031259363143,168.4565529655322,-98.25015629681572,101.8574506303218,2.842170943040401e-14,101.8574506303218C98.25015629681576,101.85745063032176,196.50031259363152,168.45655296553215,245.6253907420394,201.75610413313734L294.7504688904473,235.05565530074253"></path></g></svg>
+    """
+  end
+
   defp svg_generated(projects, options \\ [])
   defp svg_generated(projects, options) when is_list(projects) do
     project_dirs = Enum.map(projects, &project_dir/1)

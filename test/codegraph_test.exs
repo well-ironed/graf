@@ -207,7 +207,7 @@ defmodule CodegraphTest do
   end
 
   test "a module calling dependency module with --max-deps-depth=0 "<>
-  "in an umbrella up creates an edge on the graph" do
+  "in an umbrella app creates an edge on the graph" do
     # given
     project = "modules_a_and_b_call_dep_in_an_umbrella"
     deps_fetched_for_project(project)
@@ -225,7 +225,7 @@ defmodule CodegraphTest do
   end
 
   test "a module calling dependency module with --max-deps-depth=1 "<>
-  "in an umbrella up creates an edge on the graph" do
+  "in an umbrella app creates an edge on the graph" do
     # given
     project = "modules_a_and_b_call_dep_in_an_umbrella"
     deps_fetched_for_project(project)
@@ -271,6 +271,86 @@ defmodule CodegraphTest do
     assert Jason.decode!(output) == [
       %{"name" => "A", "imports" => ["Enum"]},
       %{"name" => "Enum", "imports" => []}
+    ]
+  end
+
+  test "a module calling dependency module with --max-deps-depth=0 and no --builtin "<>
+  "in an umbrella app calling builtin modules creates an edge on the graph" do
+    # given
+    project = "modules_a_and_b_call_dep_and_builtin_in_an_umbrella"
+    deps_fetched_for_project(project)
+    project_compiled(project)
+    graph_generator_compiled()
+
+    # when
+    output = graph_generated(project, ["--max-deps-depth=0"])
+
+    # then
+    assert Jason.decode!(output) == [
+      %{"name" => "A", "imports" => ["B"]},
+      %{"name" => "B", "imports" => []}
+    ]
+  end
+
+  test "a module calling dependency module with --max-deps-depth=0 and --builtin "<>
+  "in an umbrella app calling builtin modules creates edges on the graph" do
+    # given
+    project = "modules_a_and_b_call_dep_and_builtin_in_an_umbrella"
+    deps_fetched_for_project(project)
+    project_compiled(project)
+    graph_generator_compiled()
+
+    # when
+    output = graph_generated(project, ["--max-deps-depth=0", "--builtin"])
+
+    # then
+    assert Jason.decode!(output) == [
+      %{"name" => "A", "imports" => ["B", "List"]},
+      %{"name" => "B", "imports" => ["Enum"]},
+      %{"name" => "Enum", "imports" => []},
+      %{"name" => "List", "imports" => []}
+    ]
+  end
+
+  test "a module calling dependency module with --max-deps-depth=1 and no --builtin "<>
+  "in an umbrella app calling builtin modules creates edges on the graph" do
+    # given
+    project = "modules_a_and_b_call_dep_and_builtin_in_an_umbrella"
+    deps_fetched_for_project(project)
+    project_compiled(project)
+    graph_generator_compiled()
+
+    # when
+    output = graph_generated(project, ["--max-deps-depth=1"])
+
+    # then
+    assert Jason.decode!(output) == [
+      %{"name" => "A", "imports" => ["B", "FE.Maybe"]},
+      %{"name" => "B", "imports" => ["FE.Maybe"]},
+      %{"name" => "FE.Maybe", "imports" => []}
+    ]
+  end
+
+  test "a module calling dependency module with --max-deps-depth=1 and --builtin "<>
+  "in an umbrella app calling builtin modules creates edges on the graph" do
+    # given
+    project = "modules_a_and_b_call_dep_and_builtin_in_an_umbrella"
+    deps_fetched_for_project(project)
+    project_compiled(project)
+    graph_generator_compiled()
+
+    # when
+    output = graph_generated(project, ["--max-deps-depth=1", "--builtin"])
+
+    # then
+    assert Jason.decode!(output) == [
+      %{"name" => "A", "imports" => ["B", "FE.Maybe", "List"]},
+      %{"name" => "B", "imports" => ["FE.Maybe", "Enum"]},
+      %{"name" => "Enum", "imports" => []},
+      %{"name" => "Enum.EmptyError", "imports" => []},
+      %{"name" => "FE.Maybe", "imports" => ["Enum.EmptyError", "erlang", "Enum"]},
+      %{"name" => "List", "imports" => []},
+      %{"name" => "erlang", "imports" => []}
     ]
   end
 
