@@ -32,7 +32,7 @@ defmodule Codegraph.Project.Modules do
   end
 
   defp beam_files(dir) do
-    dir ++ ["*.beam"]
+    (dir ++ ["*.beam"])
     |> Path.join()
     |> Path.wildcard()
     |> Enum.map(&String.to_charlist/1)
@@ -40,10 +40,13 @@ defmodule Codegraph.Project.Modules do
 
   defp compile_paths(project_dir) do
     case System.cmd(
-      "mix", ["run", "-e", "IO.puts Mix.Project.umbrella?()"],
-      cd: project_dir) do
+           "mix",
+           ["run", "-e", "IO.puts Mix.Project.umbrella?()"],
+           cd: project_dir
+         ) do
       {"false\n", 0} ->
         [compile_path(project_dir)]
+
       {"true\n", 0} ->
         [project_dir, "apps", "*"]
         |> Path.join()
@@ -53,9 +56,13 @@ defmodule Codegraph.Project.Modules do
   end
 
   defp compile_path(dir) do
-    {compile_path, 0} = System.cmd(
-      "mix", ["run", "-e", "IO.puts Mix.Project.compile_path()"],
-      cd: dir)
+    {compile_path, 0} =
+      System.cmd(
+        "mix",
+        ["run", "-e", "IO.puts Mix.Project.compile_path()"],
+        cd: dir
+      )
+
     String.trim(compile_path) |> Path.split()
   end
 end

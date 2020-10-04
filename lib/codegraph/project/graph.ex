@@ -9,8 +9,13 @@ defmodule Codegraph.Project.Graph do
 
     graph = graph_from_abstract_code(projects_modules ++ deps_modules)
 
-    graphed_modules = graphed_modules(
-      projects_modules, deps_modules, graph, max_deps_depth)
+    graphed_modules =
+      graphed_modules(
+        projects_modules,
+        deps_modules,
+        graph,
+        max_deps_depth
+      )
 
     builtin_modules = builtin_modules(graph, projects_modules, deps_modules)
 
@@ -33,6 +38,7 @@ defmodule Codegraph.Project.Graph do
   defp graphed_modules(projects_modules, _deps_modules, _graph, 0) do
     projects_modules |> Modules.names() |> Set.new()
   end
+
   defp graphed_modules(projects_modules, deps_modules, graph, max_deps_depth) do
     modules = projects_modules |> Modules.names() |> Set.new()
     deps_modules = deps_modules |> Modules.names() |> Set.new()
@@ -67,14 +73,18 @@ defmodule Codegraph.Project.Graph do
     end)
   end
 
-  defp opcode_to_edges(module,
-    {:call_ext_only, _, {:extfunc, another_module, _, _}}) do
-      [{module, another_module}]
+  defp opcode_to_edges(
+         module,
+         {:call_ext_only, _, {:extfunc, another_module, _, _}}
+       ) do
+    [{module, another_module}]
   end
 
-  defp opcode_to_edges(module,
-    {:call_ext_last, _, {:extfunc, another_module, _, _}, _}) do
-      [{module, another_module}]
+  defp opcode_to_edges(
+         module,
+         {:call_ext_last, _, {:extfunc, another_module, _, _}, _}
+       ) do
+    [{module, another_module}]
   end
 
   defp opcode_to_edges(module, {:call_ext, _, {:extfunc, another_module, _, _}}) do
@@ -92,7 +102,7 @@ defmodule Codegraph.Project.Graph do
           []
       end
     else
-        []
+      []
     end
   end
 

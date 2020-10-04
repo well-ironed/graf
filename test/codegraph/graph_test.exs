@@ -50,12 +50,10 @@ defmodule Codegraph.GraphTest do
     g = Graph.new()
     g = Graph.add_edge(g, 1, 2)
 
-    g =
-      Graph.map(g, fn x, y -> {x*2, y+3} end)
+    g = Graph.map(g, fn x, y -> {x * 2, y + 3} end)
 
     assert Graph.edges(g) == [{2, 5}]
   end
-
 
   test "all the edges can be fetched as a list" do
     g = Graph.new()
@@ -97,15 +95,16 @@ defmodule Codegraph.GraphTest do
     g = Graph.add_edge(g, "A", "d")
     g = Graph.add_edge(g, "A", "e")
     g = Graph.add_edge(g, "A", "f")
+
     assert Graph.to_map(g) == %{
-      "a" => ["c", "b"],
-      "A" => ["f", "e", "d"],
-      "b" => [],
-      "c" => [],
-      "d" => [],
-      "e" => [],
-      "f" => []
-    }
+             "a" => ["c", "b"],
+             "A" => ["f", "e", "d"],
+             "b" => [],
+             "c" => [],
+             "d" => [],
+             "e" => [],
+             "f" => []
+           }
   end
 
   test "all vertices can be returned for an empty graph" do

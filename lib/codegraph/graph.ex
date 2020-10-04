@@ -52,5 +52,4 @@ defmodule Codegraph.Graph do
       Set.new(graph |> edges() |> Enum.map(&elem(&1, 0)))
     )
   end
-
 end
