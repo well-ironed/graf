@@ -78,7 +78,7 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     project = "module_a_calls_dep_without_any_deps"
 
     # when
-    output = svg_generated(project, ["--max-deps-depth=1"])
+    output = svg_generated(project, %{"MAX_DEPS_DEPTH" => "1"})
 
     # then
     assert output == """
@@ -96,7 +96,7 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     project = "module_a_calls_dep_without_any_deps"
 
     # when
-    output = svg_generated(project, ["--max-deps-depth=2"])
+    output = svg_generated(project, %{"MAX_DEPS_DEPTH" => "2"})
 
     # then
     assert output == """
@@ -120,7 +120,7 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     project = "modules_a_and_b_call_dep_in_an_umbrella"
 
     # when
-    output = svg_generated(project, ["--max-deps-depth=0"])
+    output = svg_generated(project, %{"MAX_DEPS_DEPTH" => "0"})
 
     # then
     assert output == """
@@ -139,7 +139,7 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     project = "modules_a_and_b_call_dep_in_an_umbrella"
 
     # when
-    output = svg_generated(project, ["--max-deps-depth=1"])
+    output = svg_generated(project, %{"MAX_DEPS_DEPTH" => "1"})
 
     # then
     assert output == """
@@ -159,7 +159,7 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     project = "modules_a_and_b_call_dep_in_an_umbrella"
 
     # when
-    output = svg_generated(project, ["--max-deps-depth=2"])
+    output = svg_generated(project, %{"MAX_DEPS_DEPTH" => "2"})
 
     # then
     assert output == """
@@ -185,7 +185,7 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     project = "module_a_calls_enum"
 
     # when
-    output = svg_generated(project, ["--builtin"])
+    output = svg_generated(project, %{"BUILTIN" => "true"})
 
     # then
     assert output == """
@@ -203,7 +203,7 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     project = "modules_a_and_b_call_dep_and_builtin_in_an_umbrella"
 
     # when
-    output = svg_generated(project, ["--max-deps-depth=0"])
+    output = svg_generated(project, %{"MAX_DEPS_DEPTH" => "0"})
 
     # then
     assert output == """
@@ -221,7 +221,7 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     project = "modules_a_and_b_call_dep_and_builtin_in_an_umbrella"
 
     # when
-    output = svg_generated(project, ["--max-deps-depth=0", "--builtin"])
+    output = svg_generated(project, %{"MAX_DEPS_DEPTH" => "0", "BUILTIN" => "true"})
 
     # then
     assert output == """
@@ -243,7 +243,7 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     project = "modules_a_and_b_call_dep_and_builtin_in_an_umbrella"
 
     # when
-    output = svg_generated(project, ["--max-deps-depth=1"])
+    output = svg_generated(project, %{"MAX_DEPS_DEPTH" => "1"})
 
     # then
     assert output == """
@@ -263,7 +263,7 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     project = "modules_a_and_b_call_dep_and_builtin_in_an_umbrella"
 
     # when
-    output = svg_generated(project, ["--max-deps-depth=1", "--builtin"])
+    output = svg_generated(project, %{"MAX_DEPS_DEPTH" => "1", "BUILTIN" => "true"})
 
     # then
     assert output == """
@@ -285,10 +285,11 @@ test "HEB graph is generated for the `module_a_calls_b` project" do
     """
   end
 
-  defp svg_generated(projects, options \\ [])
+  defp svg_generated(projects, options \\ %{})
   defp svg_generated(projects, options) when is_list(projects) do
     project_dirs = Enum.map(projects, &project_dir/1)
-    {output, 0} = System.cmd("bash", ["./priv/generate.sh" | options ++ project_dirs])
+    {output, 0} = System.cmd(
+      "bash", ["./priv/generate.sh" | project_dirs], env: options)
     output
   end
   defp svg_generated(project, options), do: svg_generated([project], options)

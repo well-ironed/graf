@@ -11,7 +11,10 @@ const dom = new JSDOM(`<!DOCTYPE html><body></body>`);
 
 const args = parseArgs(
     process.argv.slice(2),
-    {string: ["color"], default: {"color": "#ccc"}});
+    {string: ["color"],
+     boolean: ["shorten_module_names"],
+     default: {"color": "#ccc", "shorten_module_names": true}
+    });
 
 const color = args.color;
 const width = 954;
@@ -80,7 +83,7 @@ function hebChart(data) {
         .attr("x", d => d.x < Math.PI ? 6 : -6)
         .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
         .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
-        .text(d => d.data.name.split(".").slice(-1).pop())
+        .text(d => args.shorten_module_names ? d.data.name.split(".").slice(-1).pop() : d.data.name)
         .each(function(d) { d.text = this; })
         .call(text => text.append("title").text(d => `${idWithoutRoot(d)}
             ${d.outgoing.length} outgoing

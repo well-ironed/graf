@@ -1,7 +1,9 @@
 .PHONY:	docker setup compile
 
+DOCKER_TAG ?= codegraph
+
 docker:
-	docker build . -t codegraph
+	docker build . -t $(DOCKER_TAG)
 
 setup:
 	mix local.hex --force

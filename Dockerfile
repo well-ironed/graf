@@ -29,6 +29,8 @@ RUN git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.0 && \
 
 RUN echo ". $HOME/.asdf/asdf.sh" >> ~/.bashrc
 
+RUN /bin/bash --login -c "mix local.hex --force && mix local.rebar --force"
+
 COPY . /codegraph
 
 RUN /bin/bash --login -c "cd /codegraph && make compile"
