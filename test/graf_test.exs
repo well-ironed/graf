@@ -1,4 +1,4 @@
-defmodule CodegraphTest do
+defmodule GrafTest do
   use ExUnit.Case, async: true
 
   test "a module calling another module creates an edge on the graph" do
@@ -395,7 +395,7 @@ defmodule CodegraphTest do
     {output, 0} =
       System.cmd(
         "mix",
-        ["run", "priv/codegraph.exs"] ++ options ++ projects_dirs
+        ["run", "priv/graf.exs"] ++ options ++ projects_dirs
       )
 
     output

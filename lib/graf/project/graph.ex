@@ -1,7 +1,7 @@
-defmodule Codegraph.Project.Graph do
+defmodule Graf.Project.Graph do
   alias MapSet, as: Set
-  alias Codegraph.Graph
-  alias Codegraph.Project.Modules
+  alias Graf.Graph
+  alias Graf.Project.Modules
 
   def for_projects(projects_dirs, max_deps_depth, include_builtin) do
     projects_modules = Modules.projects_abstract_code(projects_dirs)

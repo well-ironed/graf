@@ -1,4 +1,4 @@
-defmodule Codegraph.Project.Modules do
+defmodule Graf.Project.Modules do
   alias MapSet, as: Set
 
   def projects_abstract_code(projects_dirs) do

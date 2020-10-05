@@ -1,4 +1,4 @@
-defmodule Codegraph.Graph do
+defmodule Graf.Graph do
   @type vertex :: String.t()
   @type edge :: {vertex, vertex}
 

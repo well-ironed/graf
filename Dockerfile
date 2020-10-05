@@ -31,9 +31,9 @@ RUN echo ". $HOME/.asdf/asdf.sh" >> ~/.bashrc
 
 RUN /bin/bash --login -c "mix local.hex --force && mix local.rebar --force"
 
-COPY . /codegraph
+COPY . /graf
 
-RUN /bin/bash --login -c "cd /codegraph && make compile"
+RUN /bin/bash --login -c "cd /graf && make compile"
 
-WORKDIR /codegraph
+WORKDIR /graf
 ENTRYPOINT ["./priv/generate.sh"]

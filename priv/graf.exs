@@ -6,7 +6,7 @@
 
 max_deps_depth = Keyword.get(options, :max_deps_depth, 0)
 include_builtin = Keyword.get(options, :builtin, false)
-graph = Codegraph.from_projects(directories, max_deps_depth, include_builtin)
+graph = Graf.from_projects(directories, max_deps_depth, include_builtin)
 
 output = Jason.encode!(graph, pretty: true)
 

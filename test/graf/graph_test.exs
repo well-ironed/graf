@@ -1,7 +1,7 @@
-defmodule Codegraph.GraphTest do
+defmodule Graf.GraphTest do
   use ExUnit.Case, async: true
 
-  alias Codegraph.Graph
+  alias Graf.Graph
 
   test "it can be created" do
     assert Graph.new()

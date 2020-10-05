@@ -15,7 +15,7 @@ MAX_DEPS_DEPTH=${MAX_DEPS_DEPTH:=0}
 BUILTIN=${BUILTIN:=false}
 SHORTEN_MODULE_NAMES=${SHORTEN_MODULE_NAMES:=true}
 COLOR=${COLOR:="#ccc"}
-mix run priv/codegraph.exs $projects \
+mix run priv/graf.exs $projects \
     --max-deps-depth=${MAX_DEPS_DEPTH} \
     --builtin=${BUILTIN} | \
     node priv/heb/index.js \

@@ -1,5 +1,5 @@
-defmodule Codegraph do
-  alias Codegraph.{Graph, Project}
+defmodule Graf do
+  alias Graf.{Graph, Project}
 
   def from_projects(projects_dirs, max_deps_depth \\ 0, include_builtin \\ false) do
     projects_dirs

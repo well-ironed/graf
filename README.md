@@ -1,4 +1,4 @@
-# Codegraph
+# Graf
 
 Visualizes Elixir project codebase as a [Hierarchichal Edge Bundling](https://www.data-to-viz.com/graph/edge_bundling.html) graph.
 
@@ -14,7 +14,7 @@ docker run --rm -v /tmp/ecto:/project \
     -e BUILTIN=false \
     -e SHORTEN_MODULE_NAMES=false \
     -e COLOR=lightsteelblue \
-    studzien/codegraph:latest /project \
+    studzien/graf:latest /project \
     > ecto.svg
 ```
 
@@ -30,7 +30,7 @@ Hierarchichal Edge Bundling graph representing structure of these projects.
 
 Generation has two phases:
 
-  1. An Elixir script (`priv/codegraph.exs`) first generates JSON with
+  1. An Elixir script (`priv/graf.exs`) first generates JSON with
   relationships between modules from provided projects and for given options;
   1. A Node.js script (`priv/heb/index.js`) then generates a SVG from the JSON.
 
@@ -46,7 +46,7 @@ The available variables are:
 
 - `MAX_DEPS_DEPTH` (default: 0) - how deep the generator should look into the dependencies when generating graph?
 - `BUILTIN` (default: false) - should built-in modules (like `Enum` or `erlang`) be considered when generating the graph?
-- `SHORTEN_MODULE_NAMES` (default: true) - should the module name on the graph be shortened to the last part? (i.e. `Graph` instead of `Codegraph.Graph`)
+- `SHORTEN_MODULE_NAMES` (default: true) - should the module name on the graph be shortened to the last part? (i.e. `Graph` instead of `Graf.Graph`)
 - `COLOR` (default: #ccc) - the color of edges on the graph
 
 ## Troubleshooting
