@@ -14,6 +14,10 @@ RUN yum -y update && \
     yum install -y autoconf automake git gcc make ncurses-devel openssl-devel \
          glibc-langpack-en unzip
 
+RUN yum install -y epel-release && \
+    yum repolist && \
+    yum install -y inotify-tools
+
 RUN git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.0 && \
     . $HOME/.asdf/asdf.sh && \
     asdf plugin add erlang && \
