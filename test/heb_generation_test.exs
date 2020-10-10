@@ -285,6 +285,26 @@ defmodule HEBGenerationTest do
            """
   end
 
+  test "HEB graph is generated for the `application_logging_at_startup` project with " <>
+         "builtin modules" do
+    # given
+    project = "application_logging_at_startup"
+
+    # when
+    output = svg_generated(project, %{"BUILTIN" => "true"})
+
+    # then
+    assert output == """
+           <svg viewBox="-477,-477,954,954" xmlns="http://www.w3.org/2000/svg"><g font-family="sans-serif" font-size="10"><g transform="rotate(-30.000000000000007) translate(377,0)"><text dy="0.31em" x="6" text-anchor="start">Application<title>ApplicationLoggingAtStartup.Application
+                       2 outgoing
+                       0 incoming</title></text></g><g transform="rotate(90) translate(377,0)"><text dy="0.31em" x="-6" text-anchor="end" transform="rotate(180)">Logger<title>Logger
+                       0 outgoing
+                       1 incoming</title></text></g><g transform="rotate(210.00000000000006) translate(377,0)"><text dy="0.31em" x="-6" text-anchor="end" transform="rotate(180)">Supervisor<title>Supervisor
+                       0 outgoing
+                       1 incoming</title></text></g></g><g stroke="#ccc" fill="none"><path style="mix-blend-mode: multiply;" d="M326.49157722673334,-188.50000000000003L276.1574590709453,-154.72708333333335C225.82334091515725,-120.9541666666667,125.15510460358111,-53.40833333333334,70.73984173245891,40.84166666666666C16.32457886133669,135.09166666666667,8.162289430668368,256.04583333333335,4.081144715334208,316.5229166666667L4.7770319507798133e-14,377"></path><path style="mix-blend-mode: multiply;" d="M326.49157722673334,-188.50000000000003L272.07631435561115,-161.79583333333335C217.6610514844889,-135.0916666666667,108.83052574224445,-81.68333333333335,0,-81.68333333333335C-108.83052574224445,-81.68333333333335,-217.6610514844889,-135.0916666666667,-272.07631435561115,-161.79583333333335L-326.49157722673334,-188.50000000000003"></path></g></svg>
+           """
+  end
+
   defp svg_generated(projects, options \\ %{})
 
   defp svg_generated(projects, options) when is_list(projects) do

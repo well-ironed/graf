@@ -39,30 +39,46 @@ defmodule Graf.Project.Modules do
   end
 
   defp compile_paths(project_dir) do
-    case System.cmd(
-           "mix",
-           ["run", "-e", "IO.puts Mix.Project.umbrella?()"],
-           cd: project_dir
-         ) do
-      {"false\n", 0} ->
-        [compile_path(project_dir)]
-
-      {"true\n", 0} ->
+    case umbrella_project?(project_dir) do
+      true ->
         [project_dir, "apps", "*"]
         |> Path.join()
         |> Path.wildcard()
         |> Enum.map(&compile_path/1)
+
+      false ->
+        [compile_path(project_dir)]
+    end
+  end
+
+  defp umbrella_project?(project_dir) do
+    {output, 0} =
+      System.cmd(
+        "mix",
+        ["run", "-e", "IO.puts Mix.Project.umbrella?()"],
+        cd: project_dir
+      )
+
+    output
+    |> String.split("\n", trim: true)
+    |> List.last()
+    |> case do
+      "true" -> true
+      "false" -> false
     end
   end
 
   defp compile_path(dir) do
-    {compile_path, 0} =
+    {output, 0} =
       System.cmd(
         "mix",
         ["run", "-e", "IO.puts Mix.Project.compile_path()"],
         cd: dir
       )
 
-    String.trim(compile_path) |> Path.split()
+    output
+    |> String.split("\n", trim: true)
+    |> List.last()
+    |> Path.split()
   end
 end
