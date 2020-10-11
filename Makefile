@@ -10,6 +10,7 @@ docker:
 
 setup:
 	mix local.hex --force
+	mix deps.get
 	cd priv/heb && npm install
 
 test: compile
