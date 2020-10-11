@@ -34,3 +34,16 @@ jobs:
     - name: Run tests
       run: make test
 
+  build_docker_and_push:
+    name: Build and push latest Docker image
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v1.1.1
+      with:
+        name: studzien/graf
+        tags: latest
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
