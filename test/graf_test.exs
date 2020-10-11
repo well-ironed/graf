@@ -375,6 +375,27 @@ defmodule GrafTest do
              ]
   end
 
+  test "json with relationships can be generated for an application that logs at startup" do
+    # given
+    project = "application_logging_at_startup"
+    project_compiled(project)
+    graph_generator_compiled()
+
+    # when
+    output = graph_generated(project, ["--builtin"])
+
+    # then
+    assert Jason.decode!(output) ==
+             [
+               %{
+                 "name" => "ApplicationLoggingAtStartup.Application",
+                 "imports" => ["Logger", "Supervisor"]
+               },
+               %{"name" => "Logger", "imports" => []},
+               %{"name" => "Supervisor", "imports" => []}
+             ]
+  end
+
   defp deps_fetched_for_project(project_name) do
     {_, 0} = System.cmd("mix", ["deps.get"], cd: project_dir(project_name))
   end
