@@ -51,4 +51,11 @@ The available variables are:
 
 ## Troubleshooting
 
+Since the generator relies on running `mix` in your project to gather information
+like compile paths and checks whether it's an umbrella project, it might not work
+properly if there is some output in the `mix run` output, like logs.
+
+A workaround for this is increasing log level or turning logging off for the
+time of graph generation.
+
 If a graph can't be generated for your project or seems to be incorrect please create an issue describing the problem.
