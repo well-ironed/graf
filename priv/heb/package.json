@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "d3": "^6.2.0",
+    "d3": "^7.6.1",
     "get-stdin": "^8.0.0",
     "jsdom": "^16.4.0",
     "minimist": "^1.2.5"
